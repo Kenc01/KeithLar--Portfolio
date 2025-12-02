@@ -3,6 +3,8 @@ const cors = require("cors");
 const path = require("path");
 const { Pool } = require("pg");
 
+require("dotenv").config();
+
 const app = express();
 const PORT = 5000;
 
@@ -90,11 +92,20 @@ app.post("/api/contact", async (req, res) => {
   }
 });
 
-app.get("/{*path}", (req, res) => {
-  res.sendFile(path.join(__dirname, "..", "public", "index.html"));
+// Get all contacts
+app.get("/api/contact", async (req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT * FROM contacts ORDER BY created_at DESC"
+    );
+    res.json({ success: true, contacts: result.rows });
+  } catch (err) {
+    console.error("Error fetching contacts:", err);
+    res.status(500).json({ success: false, error: "Failed to fetch contacts" });
+  }
 });
 
 app.listen(PORT, "0.0.0.0", () => {
-  console.log(`Portfolio server running on http://0.0.0.0:${PORT}`);
-  console.log("Serving static files from public directory");
+  console.log(`Portfolio server running on http://localhost:${PORT}`);
+  //console.log("Serving static files from public directory");
 });
