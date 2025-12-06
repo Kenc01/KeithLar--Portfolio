@@ -8,14 +8,18 @@ require("dotenv").config();
 const app = express();
 const PORT = 5000;
 
-// PostgreSQL connection pool
-const pool = new Pool({
-  user: process.env.DB_USER || "postgres",
-  password: process.env.DB_PASSWORD || "password",
-  host: process.env.DB_HOST || "localhost",
-  port: process.env.DB_PORT || 5432,
-  database: process.env.DB_NAME || "portfolio",
-});
+// PostgreSQL connection pool - Use Replit's DATABASE_URL if available
+const pool = new Pool(
+  process.env.DATABASE_URL
+    ? { connectionString: process.env.DATABASE_URL }
+    : {
+        user: process.env.PGUSER || process.env.DB_USER || "postgres",
+        password: process.env.PGPASSWORD || process.env.DB_PASSWORD || "password",
+        host: process.env.PGHOST || process.env.DB_HOST || "localhost",
+        port: process.env.PGPORT || process.env.DB_PORT || 5432,
+        database: process.env.PGDATABASE || process.env.DB_NAME || "portfolio",
+      }
+);
 
 // Create contacts table if it doesn't exist
 pool
@@ -38,7 +42,16 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use(express.static(path.join(__dirname, "..", "public")));
+// Serve static files from root directory (not public)
+app.use(express.static(path.join(__dirname, "..")));
+
+// Add cache control headers to prevent caching issues in Replit iframe
+app.use((req, res, next) => {
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+  next();
+});
 
 app.post("/api/contact", async (req, res) => {
   try {
