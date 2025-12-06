@@ -32,62 +32,124 @@
     <section class="portfolio" id="portfolio">
       <h2 class="heading">Latest <span>Project</span></h2>
 
-      <div class="portfolio-container">
-        <div class="portfolio-box">
-          <img src="images-2/portfolio1.jpg" alt="">
-          <div class="portfolio-layer">
-            <h4>Personal Portfolio Website</h4>
-            <p>A fully responsive personal portfolio created using HTML, CSS, and JavaScript. Designed with smooth animations, consistent visuals, and a modern layout to showcase skills and achievements.</p>
-            <a href=""><i class='bx  bx-arrow-out-up-right-square'></i> </a>
-          </div>
-        </div>
-
-        <div class="portfolio-box">
-          <img src="images-2/portfolio2.jpg" alt="">
-          <div class="portfolio-layer">
-            <h4>C# Login System</h4>
-            <p>A secure and functional login system built with C#. Features form validation, encrypted password handling, and a clean UI designed for simple authentication workflows.</p>
-            <a href=""><i class='bx  bx-arrow-out-up-right-square'></i> </a>
-          </div>
-        </div>
-
-        <div class="portfolio-box">
-          <img src="images-2/portfolio3.jpg" alt="">
-          <div class="portfolio-layer">
-            <h4>Data Analytics Dashboard</h4>
-            <p>A clean and minimal data dashboard showcasing data cleaning, visualization, and insights. Built for academic presentation using a modern, structured layout.</p>
-            <a href=""><i class='bx  bx-arrow-out-up-right-square'></i> </a>
-          </div>
-        </div>
-
-        <div class="portfolio-box">
-          <img src="images-2/portfolio4.jpg" alt="">
-          <div class="portfolio-layer">
-            <h4>Network Configuration Project</h4>
-            <p>A complete network topology and configuration using Cisco Packet Tracer. Includes VLANs, subnetting, routing, and device management for troubleshooting and networking coursework.</p>
-            <a href=""><i class='bx  bx-arrow-out-up-right-square'></i> </a>
-          </div>
-        </div>
-
-        <div class="portfolio-box">
-          <img src="images-2/portfolio5.jpg" alt="">
-          <div class="portfolio-layer">
-            <h4>Python OOP Management System</h4>
-            <p>A Python program demonstrating object-oriented programming principles such as classes, inheritance, and encapsulation. Includes organized instance management and CRUD features.</p>
-            <a href=""><i class='bx  bx-arrow-out-up-right-square'></i> </a>
-          </div>
-        </div>
-
-        <div class="portfolio-box">
-          <img src="images-2/portfolio6.jpg" alt="">
-          <div class="portfolio-layer">
-            <h4>Java Data Structures Collection</h4>
-            <p>A collection of custom Java implementations including stacks, linked lists, queues, and sorting algorithms. Built to strengthen data structure and algorithm mastery.</p>
-            <a href=""><i class='bx  bx-arrow-out-up-right-square'></i> </a>
-          </div>
+      <div class="portfolio-container" id="portfolio-container">
+        <div class="loading-state" style="grid-column: 1 / -1; text-align: center; padding: 3rem;">
+          <p>Loading projects...</p>
         </div>
       </div>
     </section>
+
+    <script>
+      async function loadPortfolioItems() {
+        const container = document.getElementById('portfolio-container');
+        
+        try {
+          const response = await fetch('/api/portfolio');
+          const data = await response.json();
+          
+          if (data.success && data.items.length > 0) {
+            container.innerHTML = data.items.map(item => `
+              <div class="portfolio-box">
+                <img src="${escapeHtml(item.image_url) || 'images-2/portfolio1.jpg'}" alt="${escapeHtml(item.title)}" onerror="this.src='images-2/portfolio1.jpg'">
+                <div class="portfolio-layer">
+                  <h4>${escapeHtml(item.title)}</h4>
+                  <p>${escapeHtml(item.description)}</p>
+                  <a href="${escapeHtml(item.project_url) || '#'}"><i class='bx bx-arrow-out-up-right-square'></i></a>
+                </div>
+              </div>
+            `).join('');
+          } else {
+            container.innerHTML = `
+              <div class="portfolio-box">
+                <img src="images-2/portfolio1.jpg" alt="Personal Portfolio Website">
+                <div class="portfolio-layer">
+                  <h4>Personal Portfolio Website</h4>
+                  <p>A fully responsive personal portfolio created using HTML, CSS, and JavaScript. Designed with smooth animations, consistent visuals, and a modern layout to showcase skills and achievements.</p>
+                  <a href="#"><i class='bx bx-arrow-out-up-right-square'></i></a>
+                </div>
+              </div>
+              <div class="portfolio-box">
+                <img src="images-2/portfolio2.jpg" alt="C# Login System">
+                <div class="portfolio-layer">
+                  <h4>C# Login System</h4>
+                  <p>A secure and functional login system built with C#. Features form validation, encrypted password handling, and a clean UI designed for simple authentication workflows.</p>
+                  <a href="#"><i class='bx bx-arrow-out-up-right-square'></i></a>
+                </div>
+              </div>
+              <div class="portfolio-box">
+                <img src="images-2/portfolio3.jpg" alt="Data Analytics Dashboard">
+                <div class="portfolio-layer">
+                  <h4>Data Analytics Dashboard</h4>
+                  <p>A clean and minimal data dashboard showcasing data cleaning, visualization, and insights. Built for academic presentation using a modern, structured layout.</p>
+                  <a href="#"><i class='bx bx-arrow-out-up-right-square'></i></a>
+                </div>
+              </div>
+              <div class="portfolio-box">
+                <img src="images-2/portfolio4.jpg" alt="Network Configuration Project">
+                <div class="portfolio-layer">
+                  <h4>Network Configuration Project</h4>
+                  <p>A complete network topology and configuration using Cisco Packet Tracer. Includes VLANs, subnetting, routing, and device management for troubleshooting and networking coursework.</p>
+                  <a href="#"><i class='bx bx-arrow-out-up-right-square'></i></a>
+                </div>
+              </div>
+              <div class="portfolio-box">
+                <img src="images-2/portfolio5.jpg" alt="Python OOP Management System">
+                <div class="portfolio-layer">
+                  <h4>Python OOP Management System</h4>
+                  <p>A Python program demonstrating object-oriented programming principles such as classes, inheritance, and encapsulation. Includes organized instance management and CRUD features.</p>
+                  <a href="#"><i class='bx bx-arrow-out-up-right-square'></i></a>
+                </div>
+              </div>
+              <div class="portfolio-box">
+                <img src="images-2/portfolio6.jpg" alt="Java Data Structures Collection">
+                <div class="portfolio-layer">
+                  <h4>Java Data Structures Collection</h4>
+                  <p>A collection of custom Java implementations including stacks, linked lists, queues, and sorting algorithms. Built to strengthen data structure and algorithm mastery.</p>
+                  <a href="#"><i class='bx bx-arrow-out-up-right-square'></i></a>
+                </div>
+              </div>
+            `;
+          }
+        } catch (error) {
+          console.error('Failed to load portfolio:', error);
+          container.innerHTML = `
+            <div class="portfolio-box">
+              <img src="images-2/portfolio1.jpg" alt="Personal Portfolio Website">
+              <div class="portfolio-layer">
+                <h4>Personal Portfolio Website</h4>
+                <p>A fully responsive personal portfolio created using HTML, CSS, and JavaScript. Designed with smooth animations, consistent visuals, and a modern layout to showcase skills and achievements.</p>
+                <a href="#"><i class='bx bx-arrow-out-up-right-square'></i></a>
+              </div>
+            </div>
+            <div class="portfolio-box">
+              <img src="images-2/portfolio2.jpg" alt="C# Login System">
+              <div class="portfolio-layer">
+                <h4>C# Login System</h4>
+                <p>A secure and functional login system built with C#. Features form validation, encrypted password handling, and a clean UI designed for simple authentication workflows.</p>
+                <a href="#"><i class='bx bx-arrow-out-up-right-square'></i></a>
+              </div>
+            </div>
+            <div class="portfolio-box">
+              <img src="images-2/portfolio3.jpg" alt="Data Analytics Dashboard">
+              <div class="portfolio-layer">
+                <h4>Data Analytics Dashboard</h4>
+                <p>A clean and minimal data dashboard showcasing data cleaning, visualization, and insights. Built for academic presentation using a modern, structured layout.</p>
+                <a href="#"><i class='bx bx-arrow-out-up-right-square'></i></a>
+              </div>
+            </div>
+          `;
+        }
+      }
+
+      function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+      }
+
+      document.addEventListener('DOMContentLoaded', loadPortfolioItems);
+    </script>
 
     <footer class="footer">
       <div class="footer-text">

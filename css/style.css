@@ -618,8 +618,11 @@ span {
 /* ----------contact section design------------ */
 
 .contact {
-  min-height: auto;
+  min-height: calc(100vh - 8rem);
   padding-bottom: 7rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .contact form {

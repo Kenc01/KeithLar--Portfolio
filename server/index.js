@@ -36,7 +36,24 @@ pool
   )
 `
   )
-  .catch((err) => console.error("Error creating table:", err));
+  .catch((err) => console.error("Error creating contacts table:", err));
+
+pool
+  .query(
+    `
+  CREATE TABLE IF NOT EXISTS portfolio_items (
+    id SERIAL PRIMARY KEY,
+    title VARCHAR(200) NOT NULL,
+    description TEXT NOT NULL,
+    image_url VARCHAR(500),
+    project_url VARCHAR(500),
+    display_order INTEGER DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  )
+`
+  )
+  .catch((err) => console.error("Error creating portfolio_items table:", err));
 
 app.use(cors());
 app.use(express.json());
@@ -233,6 +250,105 @@ app.get("/api/contact", async (req, res) => {
   } catch (err) {
     console.error("Error fetching contacts:", err);
     res.status(500).json({ success: false, error: "Failed to fetch contacts" });
+  }
+});
+
+app.get("/api/portfolio", async (req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT * FROM portfolio_items ORDER BY display_order ASC, created_at DESC"
+    );
+    res.json({ success: true, items: result.rows });
+  } catch (err) {
+    console.error("Error fetching portfolio items:", err);
+    res.status(500).json({ success: false, error: "Failed to fetch portfolio items" });
+  }
+});
+
+app.get("/api/admin/portfolio", isAdminAuthenticated, async (req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT * FROM portfolio_items ORDER BY display_order ASC, created_at DESC"
+    );
+    res.json({ success: true, items: result.rows });
+  } catch (err) {
+    console.error("Error fetching portfolio items:", err);
+    res.status(500).json({ success: false, error: "Failed to fetch portfolio items" });
+  }
+});
+
+app.post("/api/admin/portfolio", isAdminAuthenticated, async (req, res) => {
+  try {
+    const { title, description, image_url, project_url, display_order } = req.body;
+
+    if (!title || !description) {
+      return res.status(400).json({
+        success: false,
+        error: "Title and description are required",
+      });
+    }
+
+    const result = await pool.query(
+      `INSERT INTO portfolio_items (title, description, image_url, project_url, display_order)
+       VALUES ($1, $2, $3, $4, $5)
+       RETURNING *`,
+      [title, description, image_url || '', project_url || '', display_order || 0]
+    );
+
+    res.json({ success: true, item: result.rows[0] });
+  } catch (err) {
+    console.error("Error creating portfolio item:", err);
+    res.status(500).json({ success: false, error: "Failed to create portfolio item" });
+  }
+});
+
+app.put("/api/admin/portfolio/:id", isAdminAuthenticated, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title, description, image_url, project_url, display_order } = req.body;
+
+    if (!title || !description) {
+      return res.status(400).json({
+        success: false,
+        error: "Title and description are required",
+      });
+    }
+
+    const result = await pool.query(
+      `UPDATE portfolio_items 
+       SET title = $1, description = $2, image_url = $3, project_url = $4, display_order = $5, updated_at = CURRENT_TIMESTAMP
+       WHERE id = $6
+       RETURNING *`,
+      [title, description, image_url || '', project_url || '', display_order || 0, id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ success: false, error: "Portfolio item not found" });
+    }
+
+    res.json({ success: true, item: result.rows[0] });
+  } catch (err) {
+    console.error("Error updating portfolio item:", err);
+    res.status(500).json({ success: false, error: "Failed to update portfolio item" });
+  }
+});
+
+app.delete("/api/admin/portfolio/:id", isAdminAuthenticated, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await pool.query(
+      "DELETE FROM portfolio_items WHERE id = $1 RETURNING id",
+      [id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ success: false, error: "Portfolio item not found" });
+    }
+
+    res.json({ success: true, message: "Portfolio item deleted successfully" });
+  } catch (err) {
+    console.error("Error deleting portfolio item:", err);
+    res.status(500).json({ success: false, error: "Failed to delete portfolio item" });
   }
 });
 
